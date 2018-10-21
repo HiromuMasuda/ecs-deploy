@@ -9,7 +9,7 @@ class ECSDeploy
   def initialize
     validate_args
 
-    @env = ENV["ENV"] || "prd"
+    @env = ENV["ENV"] || "stg"
     begin
       env = YAML.load_file("./env/#{@env}.yml")
     rescue Errno::ENOENT
