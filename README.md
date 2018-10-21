@@ -48,6 +48,40 @@ Finally install jq command.
 
 # Usage
 
+```
+Usage: ruby path/to/ecs-deploy.rb COMMAND [OPTIONS]
+
+Commands:
+  deploy    Deploy tasks from latest images.
+  rollback  Rollback tasks to the images of previous version.
+
+Options:
+  --canary     Run canary deploy/rollback.
+```
+
+For canary deploy, run
+
+```
+ruby path/to/ecs-deploy.rb deploy --canary
+```
+
+For canary rollback, run
+
+```
+ruby path/to/ecs-deploy.rb rollback --canary
+```
+
+For deploy, run
+
+```
+ruby path/to/ecs-deploy.rb deploy
+```
+
+For rollback, run
+
+```
+ruby path/to/ecs-deploy.rb rollback
+```
 
 # Deployment
 
