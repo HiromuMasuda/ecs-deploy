@@ -1,30 +1,22 @@
 require "json"
+require "yaml"
+
+class EnvFileMissingError < StandardError; end
 
 class ECSDeploy
-
-  PROJECT_NAME = ""
-  REPOSITORY_NAME = ""
   CANARY_STARTED_BY_TAG = "canary"
-  TARGET_GROUP_ARN_SUFFIX = ""
-  ECR_URL = ""
 
   def initialize
     validate_args
 
-    @env = ENV["ENV"] || "stg"
-    if @env == "prd"
-      @target_group_arn = ""
-    elsif @env == "stg"
-      @target_group_arn = ""
-    else
-      raise "ENV must be 'prd' or 'stg', current ENV is '#{@env}'."
+    @env = ENV["ENV"] || "prd"
+    begin
+      env = YAML.load_file("./env/#{@env}.yml")
+    rescue Errno::ENOENT
+      raise EnvFileMissingError
     end
 
-    @cluster = ""
-    @service = ""
-    @task    = ""
-
-    show_deploy_info
+    set_instance_variables(env)
     login_aws
   end
 
@@ -108,7 +100,15 @@ Options:
     puts commands
   end
 
-  def show_deploy_info
+  def set_instance_variables(env)
+    @cluster = env["ecs"]["cluster_name"]
+    @service = env["ecs"]["service_name"]
+    @task    = env["ecs"]["task_definition_name"]
+    @ecr_url = env["ecr"]["url"]
+    @dockerfile_path = env["ecr"]["local_file_path"]
+    @ecr_name = env["ecr"]["name"]
+    @target_group_arn = env["elb"]["target_group_arn"]
+
     self.instance_variables.each do |attr|
       puts "-----> #{attr}: #{self.instance_variable_get(attr)}"
     end
@@ -130,7 +130,7 @@ Options:
   end
 
   def get_ecr_image_name(tag)
-    return "#{ECR_URL}/#{REPOSITORY_NAME}:#{tag}"
+    return "#{@ecr_url}/#{@ecr_name}:#{tag}"
   end
 
   def push_latest_image
@@ -139,10 +139,10 @@ Options:
     tags = [tag_timestamp, tag_git_commit_hash]
     puts "-----> Push latest image. Tag: #{tags.join(", ")}"
 
-    cmd_build = `docker build -t #{REPOSITORY_NAME} ./`
+    cmd_build = `docker build -t #{@ecr_name} #{@dockerfile_path}`
     tags.each do |tag|
       cmd = `
-        docker tag #{REPOSITORY_NAME}:latest #{get_ecr_image_name(tag)}
+        docker tag #{@ecr_name}:latest #{get_ecr_image_name(tag)}
         docker push #{get_ecr_image_name(tag)}`
     end
 
