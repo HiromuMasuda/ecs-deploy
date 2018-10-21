@@ -104,6 +104,7 @@ Options:
     @cluster = env["ecs"]["cluster_name"]
     @service = env["ecs"]["service_name"]
     @task    = env["ecs"]["task_definition_name"]
+    @container_name = env["ecs"]["container_name"]
     @ecr_url = env["ecr"]["url"]
     @dockerfile_path = env["ecr"]["local_file_path"]
     @ecr_name = env["ecr"]["name"]
@@ -180,7 +181,7 @@ Options:
 
     new_container_definitions = []
     container_definitions.each do |container|
-      container["image"] = image_name if container["name"] == ""
+      container["image"] = image_name if container["name"] == "#{@container_name}"
       new_container_definitions << container
     end
 
