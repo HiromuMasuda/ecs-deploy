@@ -85,7 +85,29 @@ ruby path/to/ecs-deploy.rb rollback
 
 # Deployment
 
+<img width="500" alt="Screen Shot 2018-10-21 at 16.19.16.png" src="https://qiita-image-store.s3.amazonaws.com/0/108729/7714b409-bce1-7276-3a43-1d3cfe8500c2.png">
+
+## Canary Deploy
+
+1. Build latest image from Dockerfile.
+2. Push the image to ECR with timestamp and git commit hash tags.
+3. Make new revision of task definition with the image.
+4. Run one task with the task definition. This task is separated from service.
+5. Add the private IP of the task to target group.
+
+## Canary Rollback
+
+1. Stop and destroy the canary deployed task.
+2. Remove the IP from target group.
+
+## Deploy
+
+1. Update service using the latest revision of task definition.
+2. Stop and destroy the canary deployed task.
+
+## Rollback
+
+1. Update service using the previous revision of task definition.
 
 # Contributing
-
-
+Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/ecs_deploy. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the Contributor Covenant code of conduct.
